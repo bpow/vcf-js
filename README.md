@@ -14,8 +14,11 @@ This module is best used when combined with some easy way of retrieving the
 header and individual lines from a VCF, like the `@gmod/tabix` module.
 
 ```javascript
-const { TabixIndexedFile } = require('@gmod/tabix')
-const VCF = require('@gmod/vcf')
+import { TabixIndexedFile } from '@gmod/tabix'
+import VCF, { parseBreakends } from '@gmod/vcf'
+
+// note: if you are using this in a pure node environment, you may need to use
+const { default: VCF, parseBreakends } = require('@gmod/vcf')
 
 const tbiIndexed = new TabixIndexedFile({ path: '/path/to/my.vcf.gz' })
 
