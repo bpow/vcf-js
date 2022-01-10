@@ -35,6 +35,7 @@ describe('VCF parser', () => {
 ##INFO=<ID=H2,Number=0,Type=Flag,Description="HapMap2 membership">
 ##INFO=<ID=TEST,Number=1,Type=String,Description="Used for testing">
 ##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=ANN,Number=.,Type=String,Description="Functional annotations: 'Allele | Annotation | Annotation_Impact | Gene_Name | Gene_ID | Feature_Type | Feature_ID | Transcript_BioType | Rank | HGVS.c | HGVS.p | cDNA.pos / cDNA.length | CDS.pos / CDS.length | AA.pos / AA.length | Distance | ERRORS / WARNINGS / INFO'">
 ##FILTER=<ID=q10,Description="Quality below 10">
 ##FILTER=<ID=s50,Description="Less than 50% of samples have data">
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
@@ -96,6 +97,15 @@ describe('VCF parser', () => {
     )
     expect(variant).toMatchSnapshot()
     expect(variant.SAMPLES).toMatchSnapshot()
+  })
+
+  it('can parse a line with an ANN field in INFO', () => {
+    const variant = VCFParser.parseLine(
+      '1\t28237768\t.\tA\tG\t80\t.\tDP=14;ANN=G|missense_variant|MODERATE|ATPIF1|ATPIF1|transcript|NM_178190.2|protein_coding|3/3|c.187A>G|p.Arg63Gly|280/617|187/216|63/71||,G|3_prime_UTR_variant|MODIFIER|ATPIF1|ATPIF1|transcript|NM_178191.2|protein_coding|2/2|c.*1312A>G|||||1312|,G|upstream_gene_variant|MODIFIER|DNAJC8|DNAJC8|transcript|NM_014280.2|protein_coding||c.-4770T>C|||||4737|,G|intron_variant|MODIFIER|ATPIF1|ATPIF1|transcript|NM_016311.4|protein_coding|2/2|c.180-69A>G||||||\tGT:GQ:DP:HQ\t.\t.\t.\n'
+    )
+    expect(variant.INFO.ANN.length).toBe(4)
+    expect(variant.INFO.ANN[0].Annotation_Impact).toEqual('MODERATE')
+    expect(variant).toMatchSnapshot()
   })
 
   it('parses a line with a breakend ALT', () => {

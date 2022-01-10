@@ -252,6 +252,36 @@ export default class VCF {
   }
 
   /**
+   * Parses annotations of predicted molecular consequence according to http://snpeff.sourceforge.net/VCFannotationformat_v1.0.pdf
+   *
+   * Functional annotations: 'Allele | Annotation | Annotation_Impact | Gene_Name | Gene_ID | Feature_Type | Feature_ID | Transcript_BioType | Rank | HGVS.c | HGVS.p | cDNA.pos / cDNA.length | CDS.pos / CDS.length | AA.pos / AA.length | Distance | ERRORS / WARNINGS / INFO'
+   *
+   * @param {string} ann - the string value of the VCF ANN info field
+   * @returns {object} An object of key-value pairs
+   */
+  _parseAnn(ann: string) {
+    const fields = ann.split('|')
+    return {
+      Allele: fields[0],
+      Annotation: fields[1], // may need to split at '&' and could intern
+      Annotation_Impact: fields[2], // should intern, typically one of HIGH, MODERATE, LOW, MODIFIER
+      Gene_Name: fields[3], // possibly worth interning
+      Gene_ID: fields[4], // numeric?
+      Feature_Type: fields[5], // possibly intern -- often SO terms
+      Feature_ID: fields[6],
+      Transcript_BioType: fields[7], // probably internable
+      Rank: fields[8], // consider parsing as int / int
+      HGVS_c: fields[9], // not "HGVS.p" to avoid dot in property name
+      HGVS_p: fields[10],
+      cDNA_Position: fields[11], // parse as int or int / int
+      CDS_Position: fields[12], // parse as int or int/in
+      AA_Position: fields[13], // parse as int or int/in
+      Distance: fields[14], // integer?
+      Info: fields[15] || null,
+    }
+  }
+
+  /**
    * Parse a VCF line into an object like { CHROM POS ID REF ALT QUAL FILTER
    * INFO } with SAMPLES optionally included if present in the VCF
    * @param {string} line - A string of a line from a VCF. Supports both LF and
@@ -328,6 +358,9 @@ export default class VCF {
             items = true
           }
         }
+      }
+      if (key === 'ANN') {
+        items = items.map(this._parseAnn)
       }
       info[key] = items
     })
